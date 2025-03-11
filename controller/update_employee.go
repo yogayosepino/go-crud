@@ -5,6 +5,8 @@ import (
 	"html/template"
 	"net/http"
 	"path/filepath"
+
+	"github.com/yogayosepino/go-crud/model"
 )
 
 func NewUpdateEmployeeController(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
@@ -39,7 +41,7 @@ func NewUpdateEmployeeController(db *sql.DB) func(w http.ResponseWriter, r *http
 				return
 			}
 
-			var employee Employee
+			var employee model.Employee
 			err := row.Scan(
 				&employee.Name,
 				&employee.NPWP,

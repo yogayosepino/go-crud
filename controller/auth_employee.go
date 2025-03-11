@@ -7,16 +7,17 @@ import (
 	"path/filepath"
 
 	"github.com/gorilla/sessions"
+	"github.com/yogayosepino/go-crud/model"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var store = sessions.NewCookieStore([]byte("secret-key"))
 
-type Users struct {
-	Id       int
-	Username string
-	Password string
-}
+// type Users struct {
+// 	Id       int
+// 	Username string
+// 	Password string
+// }
 
 func NewLoginController(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +25,7 @@ func NewLoginController(db *sql.DB) func(w http.ResponseWriter, r *http.Request)
 			username := r.FormValue("username")
 			password := r.FormValue("password")
 
-			var users Users
+			var users model.Users
 			err := db.QueryRow("SELECT id, username, password FROM users WHERE username = ?", username).
 				Scan(&users.Id, &users.Username, &users.Password)
 			if err != nil {

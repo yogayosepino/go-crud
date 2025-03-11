@@ -5,14 +5,16 @@ import (
 	"html/template"
 	"net/http"
 	"path/filepath"
+
+	"github.com/yogayosepino/go-crud/model"
 )
 
-type Employee struct {
-	Id string
-	Name string
-	NPWP string
-	Address string
-} 
+// type Employee struct {
+// 	Id string
+// 	Name string
+// 	NPWP string
+// 	Address string
+// }
 
 func NewIndexEmployeeController(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -24,9 +26,9 @@ func NewIndexEmployeeController(db *sql.DB) func(w http.ResponseWriter, r *http.
 		}
 		defer rows.Close()
 
-		var employees []Employee
+		var employees []model.Employee
 		for rows.Next() {
-			var employee Employee
+			var employee model.Employee
 
 			err = rows.Scan(
 				&employee.Id,
