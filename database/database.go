@@ -1,10 +1,11 @@
 package database
 
-	import (
+import (
 	"database/sql"
+	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
-	)
+)
 
 func InitDatabase() *sql.DB {
 	dsn := "root@tcp(localhost:3306)/crud-employee"
@@ -18,6 +19,7 @@ func InitDatabase() *sql.DB {
 	if err != nil{
 		panic(err)
 	}
-
+	
+	fmt.Println("Database terkoneksi!")
 	return db
 }
