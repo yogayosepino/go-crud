@@ -11,7 +11,7 @@ var store = sessions.NewCookieStore([]byte("secret-key"))
 func init() {
 	store.Options = &sessions.Options{
 		Path:     "/",
-		MaxAge:   86400, // 1 hari
+		MaxAge:   0, // Session akan dihapus setelah browser ditutup atau setelah request selesai
 		HttpOnly: true,
 	}
 }
@@ -29,6 +29,9 @@ func AuthMiddleware(handlerFunc http.HandlerFunc) http.HandlerFunc {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
+
+		session.Options.MaxAge = -1
+		session.Save(r,w)
 
 		handlerFunc(w, r)
 	}
