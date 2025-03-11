@@ -19,9 +19,4 @@ func main() {
 	routes.MapRoutes(server, db)
 
 	http.ListenAndServe(":8080", server)
-
-	//testing
-
-	//testtttttttttttttttttttttt
-	
 }
