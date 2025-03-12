@@ -21,17 +21,22 @@ func MapRoutes(server *http.ServeMux, db *sql.DB) {
 	server.HandleFunc("/register", controller.NewSignupController(db))
 
 	server.HandleFunc("/api/employees", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet {
-			employees, err := controller.GetEmployees(db)
-			if err != nil {
-				http.Error(w, "Gagal mengambil data", http.StatusInternalServerError)
-				return
-			}
+		switch r.Method{
+		case http.MethodGet :
+				employees, err := controller.GetEmployees(db)
+				if err != nil {
+					http.Error(w, "Gagal mengambil data", http.StatusInternalServerError)
+					return
+				}
+	
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(employees)
+		case http.MethodPost :
+			controller.CreateEmployee(db,w,r)
 
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(employees)
-		} else {
-			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		default:
+			http.Error(w, "Method Now Allowed", http.StatusMethodNotAllowed)
 		}
+		
 	})
 }
