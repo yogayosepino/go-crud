@@ -42,6 +42,8 @@ func GetEmployees(db *sql.DB) ([]model.Employee, error) {
 	return employees, nil
 }
 
+
+//POST
 func CreateEmployee(db *sql.DB, w http.ResponseWriter, r *http.Request){
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -68,4 +70,55 @@ func CreateEmployee(db *sql.DB, w http.ResponseWriter, r *http.Request){
 	json.NewEncoder(w).Encode(map[string]string{"message": "Employee created succesfully"})
 
 }
+
+//Update PUT
+func UpdateEmployee(db *sql.DB, w http.ResponseWriter, r *http.Request){
+	if r.Method != "PUT"{
+		http.Error(w, `{"Method Not Allowed}`, http.StatusMethodNotAllowed)
+		return
+	}
+
+	//ambil id
+	id := r.URL.Query().Get("id")
+	if id == ""{
+		http.Error(w, `{"error" : "Id tidak boleh kosong}`, http.StatusBadRequest)
+		return
+	}
+
+	//decode json req body
+	var updatedData model.Employee
+	if err := json.NewDecoder(r.Body).Decode(&updatedData); err != nil {
+		http.Error(w, `{"error" : "format json tidak valid"}`, http.StatusBadRequest)
+		return
+	}
+
+	//validasi field tidak boleh kosong
+	if updatedData.Name == "" || updatedData.NPWP == "" || updatedData.Address == "" {
+		http.Error(w, `{"error" : "field tidak boleh kosong"}`, http.StatusBadRequest)
+		return
+	}
+
+	//id checking apakah ada di db
+	var existing model.Employee
+	err := db.QueryRow("SELECT id, name, npwp, address FROM employee WHERE id = ?", id).Scan(&existing.Id,&existing.Name, &existing.NPWP, &existing.Address)
+
+	if err == sql.ErrNoRows{
+		http.Error(w, `{"error" : "Data tidak ditemukan"}`, http.StatusNotFound)
+		return
+	} else if err != nil {
+		http.Error(w, `{"error" : "Gagal mengambil data"}`, http.StatusInternalServerError)
+		return
+	}
+
+	//update data
+	_, err = db.Exec("UPDATE employee SET name = ?, npwp = ?, address = ? WHERE id = ?", updatedData.Name, updatedData.NPWP, updatedData.Address, id)
+	if err != nil{
+		http.Error(w, `{"error" : "Gagal mengupdate data "}`, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(updatedData)
+}
+
 

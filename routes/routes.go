@@ -39,4 +39,8 @@ func MapRoutes(server *http.ServeMux, db *sql.DB) {
 		}
 		
 	})
+
+	server.HandleFunc("/api/employees/update", func(w http.ResponseWriter, r *http.Request) {
+		controller.UpdateEmployee(db, w, r)
+	})
 }
