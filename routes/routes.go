@@ -41,6 +41,15 @@ func MapRoutes(server *http.ServeMux, db *sql.DB) {
 	})
 
 	server.HandleFunc("/api/employees/update", func(w http.ResponseWriter, r *http.Request) {
-		controller.UpdateEmployee(db, w, r)
+		switch r.Method{
+		case http.MethodPut :
+			controller.UpdateEmployee(db,w,r)
+		
+		case http.MethodPatch:
+			controller.UpdateEmployeePatch(db,w,r)
+		default:
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		}
+		
 	})
 }
