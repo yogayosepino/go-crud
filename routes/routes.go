@@ -60,5 +60,25 @@ func MapRoutes(server *http.ServeMux, db *sql.DB) {
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		}
 	})
+
+
+	server.HandleFunc("/api/users", func(w http.ResponseWriter, r *http.Request){
+		switch r.Method{
+		case http.MethodGet :
+			users, err := controller.GetUsers(db)
+				if err != nil {
+					http.Error(w, "Gagal mengambil data", http.StatusInternalServerError)
+					return
+				}
+	
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(users)
+				
+		default :
+			http.Error(w, "Method Now Allowed", http.StatusMethodNotAllowed)
+
+		}
+
+	})
 }
 

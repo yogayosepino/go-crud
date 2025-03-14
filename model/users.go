@@ -5,3 +5,8 @@ type Users struct {
 	Username string
 	Password string
 }
+
+type UserResponse struct{
+	Id int
+	Username string
+}
