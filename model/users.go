@@ -1,12 +1,12 @@
 package model
 
 type Users struct {
-	Id       int
-	Username string
-	Password string
+	Id       string `json:"id"`
+	Username string `json:"name"`
+	Password string `json:"password"`
 }
 
 type UserResponse struct{
-	Id int
-	Username string
+	Id 		 string `json:"id"`
+	Username string `json:"name"`
 }
