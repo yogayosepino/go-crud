@@ -123,7 +123,6 @@ func UpdateEmployee(db *sql.DB, w http.ResponseWriter, r *http.Request){
 }
 
 //update patch
-// Update PATCH
 func UpdateEmployeePatch(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	if r.Method != "PATCH" {
 		http.Error(w, `{"error": "Method Not Allowed"}`, http.StatusMethodNotAllowed)
@@ -187,3 +186,35 @@ func UpdateEmployeePatch(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 
+//delete
+func DeleteEmployee(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != "DELETE"{
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	
+	//var employee model.Employee
+
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, `{"error": "Id tidak boleh kosong"}`, http.StatusBadRequest)
+		return
+	}
+
+	// err := json.NewDecoder(r.Body).Decode(&employee)
+	// if err != nil {
+	// 	http.Error(w, "Invalid Request Body", http.StatusBadRequest)
+	// 	return
+	// }
+
+	_,  err := db.Exec("DELETE FROM employee WHERE id = ?", id)
+	if err != nil {
+		http.Error(w, "Failed to delete data", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"message": "Employee deleted succesfully"})
+
+}

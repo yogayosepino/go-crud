@@ -52,4 +52,13 @@ func MapRoutes(server *http.ServeMux, db *sql.DB) {
 		}
 		
 	})
+
+	server.HandleFunc("/api/employees/delete", func(w http.ResponseWriter, r *http.Request){
+		if r.Method == http.MethodDelete{
+			controller.DeleteEmployee(db,w,r)
+		} else {
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		}
+	})
 }
+
