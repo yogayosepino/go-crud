@@ -74,6 +74,8 @@ func MapRoutes(server *http.ServeMux, db *sql.DB) {
 				w.Header().Set("Content-Type", "application/json")
 				json.NewEncoder(w).Encode(users)
 				
+		case http.MethodPost :
+			controller.CreateUser(db, w, r)
 		default :
 			http.Error(w, "Method Now Allowed", http.StatusMethodNotAllowed)
 
