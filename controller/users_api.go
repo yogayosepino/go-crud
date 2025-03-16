@@ -93,3 +93,27 @@ func CreateUser(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Users created successfully"})
 }
+
+//delete
+func DeleteUser(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != "DELETE"{
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, `{"error": "Id tidak boleh kosong"}`, http.StatusBadRequest)
+		return
+	}
+
+	_,  err := db.Exec("DELETE FROM users WHERE id = ?", id)
+	if err != nil {
+		http.Error(w, "Failed to delete data", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"message": "Users deleted succesfully"})
+
+}
