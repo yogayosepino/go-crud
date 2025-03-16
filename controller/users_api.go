@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	//"io"
 	"net/http"
 
@@ -92,6 +94,80 @@ func CreateUser(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	// Response sukses
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Users created successfully"})
+}
+//update
+func UpdateUser(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	if id == ""{
+		http.Error(w, "Id tidak boleh kosong", http.StatusBadRequest)
+		return
+	}
+
+	var users model.Users
+	err := json.NewDecoder(r.Body).Decode(&users)
+	if err != nil {
+		http.Error(w, "Invalid Request Body", http.StatusBadRequest)
+		return
+	}
+
+	switch r.Method{
+	case http.MethodPut:
+		if users.Username == "" || users.Password == ""{
+			http.Error(w, "Semua field harus diisi", http.StatusBadRequest)
+			return
+		}
+
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(users.Password), bcrypt.DefaultCost)
+		if err != nil {
+			http.Error(w, "Gagal meng-hash password", http.StatusInternalServerError)
+			return
+		}
+
+		_,err = db.Exec("UPDATE users SET username = ?, password = ? WHERE id = ?", users.Username, hashedPassword, id)
+		if err != nil {
+			fmt.Println("Database error:", err)
+			http.Error(w, "Gagal membuat akun, kemungkinan username sudah terdaftar", http.StatusInternalServerError)
+			return
+		}
+		
+	case http.MethodPatch:
+
+		var updates []string
+		var values []interface{}
+
+		if users.Username != ""{
+			updates = append(updates, "username=?")
+			values = append(values, users.Username)
+		}
+		
+		if users.Password != ""{
+			hashedPassword, err := bcrypt.GenerateFromPassword([]byte(users.Password), bcrypt.DefaultCost)
+   			if err != nil {
+        		http.Error(w, "Gagal meng-hash password", http.StatusInternalServerError)
+        		return
+    		}
+			updates = append(updates, "password=?")
+			values = append(values, string(hashedPassword))
+		}
+
+		if len(updates) == 0 {
+			http.Error(w, "Tidak ada data yang diupdate", http.StatusBadRequest)
+            return
+		}
+
+		query := fmt.Sprintf("UPDATE users SET %s WHERE id=?", strings.Join(updates, ", "))
+        values = append(values, id)
+        _, err = db.Exec(query, values...)
+    }
+
+    if err != nil {
+        http.Error(w, "Gagal mengupdate data", http.StatusInternalServerError)
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(map[string]string{"message": "Data berhasil diperbarui"})
+	
 }
 
 //delete
