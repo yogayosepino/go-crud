@@ -94,6 +94,7 @@ func CreateUser(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Users created successfully"})
 }
+
 //update
 func UpdateUser(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
