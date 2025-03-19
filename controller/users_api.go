@@ -46,7 +46,6 @@ func GetUsers(db *sql.DB) ([]model.UserResponse, error) {
 	return users, nil
 }
 
-
 //post
 func CreateUser(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
