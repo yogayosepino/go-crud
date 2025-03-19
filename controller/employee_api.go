@@ -61,6 +61,13 @@ func CreateEmployee(db *sql.DB, w http.ResponseWriter, r *http.Request){
 		return
 	}
 
+	var exists int
+	err = db.QueryRow("SELECT COUNT(*) FROM employees WHERE npwp=?", employee.NPWP).Scan(&exists)
+	if err != nil {
+    	http.Error(w, "Gagal memeriksa NPWP", http.StatusInternalServerError)
+    	return
+	}
+
 	query := "INSERT INTO employee (name, npwp, address) VALUES (?,?,?)"
 	_, err = db.Exec(query, employee.Name, employee.NPWP, employee.Address)
 	if err != nil {
