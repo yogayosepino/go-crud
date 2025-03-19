@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/yogayosepino/go-crud/model"
@@ -81,7 +82,7 @@ func UpdateEmployee(db *sql.DB, w http.ResponseWriter, r *http.Request){
 
 	//ambil id
 	id := r.URL.Query().Get("id")
-	if id == ""{
+	if id == "" || !regexp.MustCompile(`^\d+$`).MatchString(id){
 		http.Error(w, `{"error" : "Id tidak boleh kosong}`, http.StatusBadRequest)
 		return
 	}

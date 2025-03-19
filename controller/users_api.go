@@ -67,15 +67,32 @@ func CreateUser(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Password:", users.Password)
 
 	// Validasi username tidak boleh kosong
-	if users.Username == "" {
-		http.Error(w, "Username tidak boleh kosong", http.StatusBadRequest)
+	if users.Username == "" || users.Password == "" {
+		http.Error(w, "Username atau Password tidak boleh kosong", http.StatusBadRequest)
 		return
+	}
+
+	if len(users.Password) < 8{
+		http.Error(w, "Password minimal 8 karakter", http.StatusBadRequest)
+    	return
 	}
 
 	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(users.Password), bcrypt.DefaultCost)
 	if err != nil {
 		http.Error(w, "Gagal membuat akun", http.StatusInternalServerError)
+		return
+	}
+
+	var exists int
+	err = db.QueryRow("SELECT COUNT(*) FROM users WHERE username=?", users.Username).Scan(&exists)
+	if err != nil {
+		http.Error(w, "Gagal memeriksa username", http.StatusInternalServerError)
+		return
+	}
+	
+	if exists > 0 {
+		http.Error(w, "Username sudah digunakan", http.StatusConflict)
 		return
 	}
 
@@ -110,6 +127,13 @@ func UpdateUser(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var exists int
+	err = db.QueryRow("SELECT COUNT(*) FROM users WHERE id=?", id).Scan(&exists)
+	if err != nil || exists == 0 {
+    	http.Error(w, "User tidak ditemukan", http.StatusNotFound)
+    	return
+	}
+	
 	switch r.Method{
 	case http.MethodPut:
 		if users.Username == "" || users.Password == ""{
@@ -183,7 +207,14 @@ func DeleteUser(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_,  err := db.Exec("DELETE FROM users WHERE id = ?", id)
+	var exists int
+	err := db.QueryRow("SELECT COUNT(*) FROM users WHERE id=?", id).Scan(&exists)
+	if err != nil || exists == 0 {
+    	http.Error(w, "User tidak ditemukan", http.StatusNotFound)
+    	return
+	}
+
+	_,  err = db.Exec("DELETE FROM users WHERE id = ?", id)
 	if err != nil {
 		http.Error(w, "Failed to delete data", http.StatusInternalServerError)
 		return

@@ -26,6 +26,13 @@ func NewLoginController(db *sql.DB) func(w http.ResponseWriter, r *http.Request)
 			password := r.FormValue("password")
 
 			var users model.Users
+			
+			if username == "" || password == "" {
+				http.Error(w, "Username dan Password tidak boleh kosong", http.StatusBadRequest)
+				return
+			}
+			
+
 			err := db.QueryRow("SELECT id, username, password FROM users WHERE username = ?", username).
 				Scan(&users.Id, &users.Username, &users.Password)
 			if err != nil {
@@ -64,6 +71,12 @@ func NewSignupController(db *sql.DB) func(w http.ResponseWriter, r *http.Request
 		if r.Method == http.MethodPost {
 			username := r.FormValue("username")
 			password := r.FormValue("password")
+
+			if username == "" || password == "" {
+				http.Error(w, "Username dan Password tidak boleh kosong", http.StatusBadRequest)
+				return
+			}
+			
 
 			hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 			if err != nil {
