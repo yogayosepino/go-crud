@@ -68,6 +68,11 @@ func CreateEmployee(db *sql.DB, w http.ResponseWriter, r *http.Request){
     	return
 	}
 
+	if exists > 0 {
+		http.Error(w, "NPWP sudah terdaftar", http.StatusConflict)
+		return
+	}
+
 	query := "INSERT INTO employee (name, npwp, address) VALUES (?,?,?)"
 	_, err = db.Exec(query, employee.Name, employee.NPWP, employee.Address)
 	if err != nil {
